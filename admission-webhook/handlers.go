@@ -73,7 +73,7 @@ func (app *application) validate(w http.ResponseWriter, r *http.Request) {
 					requestAllowed = true
 					respMsg = "Pod Allowed because label owner is present"
 				}
-				app.infoLog.Printf("Allowed because label %v is present ", +pod.Name, "owner")
+				app.infoLog.Println("Allowed because label is present ")
 			}
 		}
 
