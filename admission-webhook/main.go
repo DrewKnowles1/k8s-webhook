@@ -1,9 +1,14 @@
 package main
 
 import (
+	"context"
+	"crypto/tls"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/caarlos0/env/v6"
 )
@@ -18,9 +23,10 @@ type application struct {
 //Below struct utilises package that makes reading env variables super easy. Below values are set to the specified env variables,
 //and if those env variables arent present, theres a sensible default provided.
 type envConfig struct {
-	CertPath string `env:"CERT_PATH" envDefault:"/source/cert.pem"`
-	KeyPath  string `env:"KeyPath" envDefault:"/source/key.pem"`
-	port     int    `env:"PORT" envDefault:"3000"`
+	CertPath string `env:"CERT_PATH" envDefault:"/source/webhook-server-tls.crt"`
+	KeyPath  string `env:"KeyPath" envDefault:"/source/webhook-server-tls.key"`
+	// port     int    `env:"PORT" envDefault:"3000"`
+	Port int `env:"PORT" envDefault:"3000"`
 }
 
 func main() {
@@ -58,8 +64,41 @@ func main() {
 		cfg:      &cfg,
 	}
 
+	//Commenting out tls cert load for now
+	tlsPair, err := tls.LoadX509KeyPair(cfg.CertPath, cfg.KeyPath)
+	if err != nil {
+		app.errorLog.Fatal("Error Loading TLS certs", err)
+	}
+
+	//Again go look into %v, as well as the tls.Config function
+	server := &http.Server{
+		Addr:      fmt.Sprintf(":%v", cfg.Port),
+		TLSConfig: &tls.Config{Certificates: []tls.Certificate{tlsPair}},
+	}
+
+	//This function will go off to another fikle, and handle all the webserver logic
+	server.Handler = app.routes()
+
 	fmt.Println("Heres your app struct: ")
-	//This just prints firlds of the struct - took it at face value from internet - maybe look into why %+v works/The Printf function
+	//This just prints fields of the struct/ stops compiler shouting at me - took it at face value from internet - maybe look into why %+v works/The Printf function
 	fmt.Printf("%+v\n", app)
+	fmt.Printf("%+v\n", server)
+
+	//you have to look into this further :)
+	//Splittng off into its own thread
+	go func() {
+		infoLog.Printf("Starting webserver on port %v", cfg.Port)
+		app.errorLog.Println(server.ListenAndServeTLS("", ""))
+		//app.errorLog.Println(server.ListenAndServe())
+	}() // ie, why the () on the end? -find out
+
+	//i know what this does in terms of high level funtionality, but zero idea whim im passing in those arguments/whats going on behind the scenes, look into it!
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	<-sigChan
+
+	app.infoLog.Println("Got shutdown signal, shutting down web server gracefully...")
+
+	server.Shutdown(context.Background())
 
 }
