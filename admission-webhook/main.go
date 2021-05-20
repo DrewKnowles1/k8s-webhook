@@ -47,6 +47,7 @@ func main() {
 
 	//3. an instantiated envConfig struct
 	//So this just creates an empty struct?
+	//A: Yes, because if you look at the struct you defined above, all the fields basically set themselves based off your env vars, or sensible defaults if the env vars arent present
 	cfg := envConfig{}
 
 	//Now we do an error check, looks like were calling
