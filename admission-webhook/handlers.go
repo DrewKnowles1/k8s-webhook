@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -9,6 +10,19 @@ import (
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
+
+func jsonFieldValidation(a *admissionv1.AdmissionRequest) error {
+	// If json field is empty, return an error with a message.
+	if a == nil {
+		return errors.New("empty admission review was sent")
+	}
+	if a.RequestKind == nil {
+		return errors.New("blah blash review was sent")
+	}
+	// if a.RequestKind.Kind == nil {
+	// }
+	return nil
+}
 
 func (app *application) healthcheck(w http.ResponseWriter, r *http.Request) {
 	//Set headers
@@ -39,6 +53,19 @@ func (app *application) validate(w http.ResponseWriter, r *http.Request) {
 	//Lets make sure the object is what we are expecting
 	//Need to understand 'input.Request.RequestKind.Kind', is this gleamed from an example json request, jsut to get datastructure?
 	//I get that its basically just reading the "Kind" field we would type out in a yaml
+
+	err = jsonFieldValidation(input.Request)
+
+	if err != nil {
+		http.Error(w, "Invalid json input", http.StatusBadRequest)
+		return
+	}
+
+	// if input.Request == nil || input.Request.RequestKind == nil {
+	// 	http.Error(w, "Invalid json input", http.StatusMethodNotAllowed)
+	// 	return
+	// }
+
 	switch input.Request.RequestKind.Kind {
 	//Check if field contains the value of pod
 	case "Pod":

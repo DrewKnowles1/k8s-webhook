@@ -80,10 +80,10 @@ func main() {
 	//This function will go off to another fikle, and handle all the webserver logic
 	server.Handler = app.routes()
 
-	fmt.Println("Heres your app struct: ")
-	//This just prints fields of the struct/ stops compiler shouting at me - took it at face value from internet - maybe look into why %+v works/The Printf function
-	fmt.Printf("%+v\n", app)
-	fmt.Printf("%+v\n", server)
+	// fmt.Println("Heres your app struct: ")
+	// //This just prints fields of the struct/ stops compiler shouting at me - took it at face value from internet - maybe look into why %+v works/The Printf function
+	// fmt.Printf("%+v\n", app)
+	// fmt.Printf("%+v\n", server)
 
 	//you have to look into this further :)
 	//Splittng off into its own thread
