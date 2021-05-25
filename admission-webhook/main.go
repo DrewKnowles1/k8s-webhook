@@ -47,6 +47,7 @@ func main() {
 
 	//3. an instantiated envConfig struct
 	//So this just creates an empty struct?
+	//A: Yes, because if you look at the struct you defined above, all the fields basically set themselves based off your env vars, or sensible defaults if the env vars arent present
 	cfg := envConfig{}
 
 	//Now we do an error check, looks like were calling
@@ -79,10 +80,10 @@ func main() {
 	//This function will go off to another fikle, and handle all the webserver logic
 	server.Handler = app.routes()
 
-	fmt.Println("Heres your app struct: ")
-	//This just prints fields of the struct/ stops compiler shouting at me - took it at face value from internet - maybe look into why %+v works/The Printf function
-	fmt.Printf("%+v\n", app)
-	fmt.Printf("%+v\n", server)
+	// fmt.Println("Heres your app struct: ")
+	// //This just prints fields of the struct/ stops compiler shouting at me - took it at face value from internet - maybe look into why %+v works/The Printf function
+	// fmt.Printf("%+v\n", app)
+	// fmt.Printf("%+v\n", server)
 
 	//you have to look into this further :)
 	//Splittng off into its own thread
